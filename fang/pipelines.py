@@ -6,6 +6,7 @@
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 import json
 import sqlite3
+import time
 
 import requests
 
@@ -60,7 +61,7 @@ class FangPipeline(object):
                 "msgtype": "markdown",
                 "markdown": {
                     "content": '''# [**{0}**]({1})\n
-                               > <font color="comment">{2}-{3}</font>      <font color="warning">**{4}万**</font>
+                               > <font color="comment">{2} - {3}</font>      <font color="warning">**{4}万**</font>
                                > <font color="comment">{5}</font>       <font color="comment">单价{6}元/平米</font>
                                > <font color="comment">{7}</font>
                                '''.format(item["title"].encode('utf-8'), item["link"].encode('utf-8'), item["xiaoqu"].encode('utf-8'), item["region"].encode('utf-8'), item["price"],
@@ -68,8 +69,8 @@ class FangPipeline(object):
                                           item["unit"], item["tag"].encode('utf-8'))
                 }
             }
-            # requests.post(url, data=json.dumps(payload))
-            print payload
+            requests.post(url, data=json.dumps(payload))
+            time.sleep(3)
         insert_sql = "REPLACE INTO {0}({1}) values ({2})".format(self.sqlite_table,
                                                                  ', '.join(item.keys()),
                                                                  ', '.join(['?'] * len(item.keys())))

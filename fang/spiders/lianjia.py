@@ -19,22 +19,22 @@ class LianJiaSpider(Spider):
         base_url = "https://sh.lianjia.com"
         for sel in response.xpath('//ul/li[@class="clear LOGVIEWDATA LOGCLICKDATA"]'):
             item = FangItem()
-            item['id'] = sel.xpath('a/@data-housecode').extract_first()
+            item['id'] = sel.xpath('@data-lj_action_housedel_id').extract_first()
             item['link'] = sel.xpath('a/@href').extract_first()
             info = sel.xpath('div[@class="info clear"]')
-            item['title'] = info.xpath('div[@class="title"]/a/text()').extract_first()
-            item['xiaoqu'] = info.xpath('div[@class="flood"]/div[@class="positionInfo"]/a[contains(@href, "xiaoqu")]/text()').extract_first()
-            item['region'] = info.xpath('div[@class="flood"]/div[@class="positionInfo"]/a[contains(@href, "ershoufang")]/text()').extract_first()
+            item['title'] = info.xpath('div[@class="title"]/a/text()').extract_first().strip()
+            item['xiaoqu'] = info.xpath('div[@class="flood"]/div[@class="positionInfo"]/a[contains(@href, "xiaoqu")]/text()').extract_first().strip()
+            item['region'] = info.xpath('div[@class="flood"]/div[@class="positionInfo"]/a[contains(@href, "ershoufang")]/text()').extract_first().strip()
             house_info = info.xpath('div[@class="address"]/div[@class="houseInfo"]/text()').extract_first()
             house_info = [i.strip() for i in house_info.split("|")]
-            item['rooms'] = house_info[0]
-            item['area'] = house_info[1]
-            item['toward'] = house_info[2]
-            item['floor'] = house_info[4]
-            item['year'] = house_info[5]
-            item['price'] = int(info.xpath('div[@class="priceInfo"]/div[@class="totalPrice"]/span/text()').extract_first())
-            item['unit'] = int(info.xpath('div[@class="priceInfo"]/div[@class="unitPrice"]/@data-price').extract_first())
-            item['tag'] = ",".join(info.xpath('div[@class="tag"]/span/text()').extract())
+            item['rooms'] = house_info[0].strip()
+            item['area'] = house_info[1].strip()
+            item['toward'] = house_info[2].strip()
+            item['floor'] = house_info[4].strip()
+            item['year'] = house_info[5].strip()
+            item['price'] = int(info.xpath('div[@class="priceInfo"]/div[@class="totalPrice"]/span/text()').extract_first().strip())
+            item['unit'] = int(info.xpath('div[@class="priceInfo"]/div[@class="unitPrice"]/@data-price').extract_first().strip())
+            item['tag'] = ",".join([i.strip() for i in info.xpath('div[@class="tag"]/span/text()').extract()])
             yield item
 
         page_data = response.css('div::attr(page-data)').extract_first()
