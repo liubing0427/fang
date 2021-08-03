@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from urlparse import urljoin
 
 import scrapy
@@ -11,8 +12,7 @@ class LianJiaSpider(Spider):
     name = "lianjia"
     allowed_domains = ["lianjia.com"]
     start_urls = [
-        "https://sh.lianjia.com/ershoufang/sanlin/a3a4/",
-        "https://sh.lianjia.com/ershoufang/jinqiao/a3a4/"
+        "https://sh.lianjia.com/ershoufang/pudong/mw1sf1l2l3a3a4bp450ep600/",
     ]
 
     def parse(self, response):
@@ -32,9 +32,10 @@ class LianJiaSpider(Spider):
             item['toward'] = house_info[2].strip()
             item['floor'] = house_info[4].strip()
             item['year'] = house_info[5].strip()
-            item['price'] = int(info.xpath('div[@class="priceInfo"]/div[@class="totalPrice"]/span/text()').extract_first().strip())
-            item['unit'] = int(info.xpath('div[@class="priceInfo"]/div[@class="unitPrice"]/@data-price').extract_first().strip())
+            item['price'] = float(info.xpath('div[@class="priceInfo"]/div[@class="totalPrice"]/span/text()').extract_first().strip())
+            item['unit'] = float(info.xpath('div[@class="priceInfo"]/div[@class="unitPrice"]/@data-price').extract_first().strip())
             item['tag'] = ",".join([i.strip() for i in info.xpath('div[@class="tag"]/span/text()').extract()])
+            item['last_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             yield item
 
         page_data = response.css('div::attr(page-data)').extract_first()

@@ -9,6 +9,7 @@ import sqlite3
 import time
 
 import requests
+from scrapy.exceptions import DropItem
 
 
 class FangPipeline(object):
@@ -39,9 +40,10 @@ class FangPipeline(object):
                             toward TEXT,
                             floor TEXT,
                             `year` TEXT,
-                            price INTEGER,
-                            unit INTEGER,
-                            tag TEXT
+                            price float,
+                            unit float,
+                            tag TEXT,
+                            last_time timestamp default NULL
                         );'''.format(self.sqlite_table)
         print create_sql
         try:
@@ -53,6 +55,10 @@ class FangPipeline(object):
         self.conn.close()
 
     def process_item(self, item, spider):
+        region = item["region"].encode('utf-8')
+        if region not in ["北蔡", "碧云", "金桥", "金杨", "周浦", "联洋", "陆家嘴", "梅园", "南码头", "三林", "世博", "塘桥", "潍坊", "杨东", "洋泾",
+                          "杨思", "前滩", "源深", "张江"]:
+            raise DropItem("Not Want item: %s" % item)
         self.cur.execute("SELECT * FROM {0}  WHERE id=?".format(self.sqlite_table), (item["id"],))
         rows = self.cur.fetchall()
         if len(rows) == 0:
@@ -64,8 +70,11 @@ class FangPipeline(object):
                                > <font color="comment">{2} - {3}</font>      <font color="warning">**{4}万**</font>
                                > <font color="comment">{5}</font>       <font color="comment">单价{6}元/平米</font>
                                > <font color="comment">{7}</font>
-                               '''.format(item["title"].encode('utf-8'), item["link"].encode('utf-8'), item["xiaoqu"].encode('utf-8'), item["region"].encode('utf-8'), item["price"],
-                                          " | ".join([item["rooms"].encode('utf-8'), item["area"].encode('utf-8'), item["toward"].encode('utf-8'), item["floor"].encode('utf-8'), item["year"].encode('utf-8')]),
+                               '''.format(item["title"].encode('utf-8'), item["link"].encode('utf-8'),
+                                          item["xiaoqu"].encode('utf-8'), item["region"].encode('utf-8'), item["price"],
+                                          " | ".join([item["rooms"].encode('utf-8'), item["area"].encode('utf-8'),
+                                                      item["toward"].encode('utf-8'), item["floor"].encode('utf-8'),
+                                                      item["year"].encode('utf-8')]),
                                           item["unit"], item["tag"].encode('utf-8'))
                 }
             }

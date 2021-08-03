@@ -48,3 +48,6 @@ class FangItem(scrapy.Item):
 
     # 标签
     tag = scrapy.Field()
+
+    # 最后一次扫描时间
+    last_time = scrapy.Field()
